@@ -395,3 +395,5 @@ cbind(A, B)  # Combine by columns
 # install.packages("Matrix")
 library(Matrix)
 sparse_mat = sparseMatrix(i = c(1,3), j = c(1,2), x = c(4,5))
+
+# From canvas
