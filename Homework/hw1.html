@@ -363,13 +363,10 @@ study_time</code></pre>
 <pre><code>##  [1] 12 15 18 20 22 22 25 27 28 30 30 31 33 35 36 38 40 42 45 50</code></pre>
 <hr />
 </div>
-<div id="histogram" class="section level2">
-<h2>8. Histogram</h2>
+<div id="section" class="section level2">
+<h2>8.</h2>
 <div id="a-frequency-table" class="section level3">
 <h3>(a) Frequency Table</h3>
-<p>We use class width 5, starting at 10: 10-14, 15-19, 20-24, …
-<code>cut()</code> bins the data into these intervals, and
-<code>table()</code> counts how many values fall in each one.</p>
 <pre class="r"><code>breaks &lt;- seq(10, 54, by = 5)
 bins &lt;- cut(study_time, breaks = breaks, right = FALSE)
 freq_table &lt;- table(bins)
@@ -377,9 +374,6 @@ freq_table</code></pre>
 <pre><code>## bins
 ## [10,15) [15,20) [20,25) [25,30) [30,35) [35,40) [40,45) [45,50) 
 ##       1       2       3       3       4       3       2       1</code></pre>
-<p><code>right = FALSE</code> makes each interval closed on the left and
-open on the right (e.g., <code>[10,15)</code>), which matches “10-14”
-when values are whole numbers.</p>
 </div>
 <div id="b-histogram" class="section level3">
 <h3>(b) Histogram</h3>
@@ -403,9 +397,7 @@ right.</p>
 <div id="box-plot" class="section level2">
 <h2>9. Box Plot</h2>
 <div id="a-five-number-summary" class="section level3">
-<h3>(a) Five-Number Summary</h3>
-<p><code>summary()</code> gives the min, Q1, median, Q3, and max in one
-step.</p>
+<h3>(a) Five Number Summary</h3>
 <pre class="r"><code>summary(study_time)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##   12.00   22.00   30.00   29.95   36.50   50.00</code></pre>
@@ -438,8 +430,7 @@ IQR_val</code></pre>
 outliers &lt;- study_time[study_time &lt; lower_fence | study_time &gt; upper_fence]
 outliers</code></pre>
 <pre><code>## numeric(0)</code></pre>
-<p>If <code>outliers</code> prints as <code>numeric(0)</code>, that
-means there are none.</p>
+<p>numeric(0) means no outliers</p>
 </div>
 <div id="c-box-plot" class="section level3">
 <h3>(c) Box Plot</h3>
@@ -459,7 +450,9 @@ means there are none.</p>
 <pre><code>## [1] 29.95</code></pre>
 <pre class="r"><code>median(study_time)</code></pre>
 <pre><code>## [1] 30</code></pre>
-<p>Compare the two numbers and the shape from part 8(c):</p>
+<p>I would say the median is the best measure of the center. The
+histogram showed a large amount of instances between 30 and 35. The
+median came out to exactly 30.</p>
 </div>
 
 

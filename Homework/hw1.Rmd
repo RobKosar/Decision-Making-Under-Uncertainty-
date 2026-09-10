@@ -17,13 +17,9 @@ study_time
 
 ---
 
-## 8. Histogram
+## 8.
 
 ### (a) Frequency Table
-
-We use class width 5, starting at 10: 10-14, 15-19, 20-24, ...
-`cut()` bins the data into these intervals, and `table()` counts how
-many values fall in each one.
 
 ```{r freq-table}
 breaks <- seq(10, 54, by = 5)
@@ -31,10 +27,6 @@ bins <- cut(study_time, breaks = breaks, right = FALSE)
 freq_table <- table(bins)
 freq_table
 ```
-
-`right = FALSE` makes each interval closed on the left and open on the
-right (e.g., `[10,15)`), which matches "10-14" when values are whole
-numbers.
 
 ### (b) Histogram
 
@@ -57,9 +49,7 @@ The distribution is close to symmetric, but it slightly skews right.
 
 ## 9. Box Plot 
 
-### (a) Five-Number Summary
-
-`summary()` gives the min, Q1, median, Q3, and max in one step.
+### (a) Five Number Summary
 
 ```{r five-number-summary}
 summary(study_time)
@@ -90,8 +80,7 @@ upper_fence
 outliers <- study_time[study_time < lower_fence | study_time > upper_fence]
 outliers
 ```
-
-If `outliers` prints as `numeric(0)`, that means there are none.
+numeric(0) means no outliers
 
 ### (c) Box Plot
 
@@ -114,4 +103,4 @@ mean(study_time)
 median(study_time)
 ```
 
-Compare the two numbers and the shape from part 8(c):
+I would say the median is the best measure of the center. The histogram showed a large amount of instances between 30 and 35. The median came out to exactly 30. 
