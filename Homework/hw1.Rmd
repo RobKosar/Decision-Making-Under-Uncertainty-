@@ -1,0 +1,117 @@
+---
+title: "Homework 1"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document:
+    extra_dependencies: ["amsmath"]
+---
+
+## The Data
+
+```{r data}
+study_time <- c(12, 15, 18, 20, 22, 22, 25, 27, 28, 30,
+                 30, 31, 33, 35, 36, 38, 40, 42, 45, 50)
+study_time
+```
+
+---
+
+## 8. Histogram
+
+### (a) Frequency Table
+
+We use class width 5, starting at 10: 10-14, 15-19, 20-24, ...
+`cut()` bins the data into these intervals, and `table()` counts how
+many values fall in each one.
+
+```{r freq-table}
+breaks <- seq(10, 54, by = 5)
+bins <- cut(study_time, breaks = breaks, right = FALSE)
+freq_table <- table(bins)
+freq_table
+```
+
+`right = FALSE` makes each interval closed on the left and open on the
+right (e.g., `[10,15)`), which matches "10-14" when values are whole
+numbers.
+
+### (b) Histogram
+
+```{r histogram}
+hist(study_time,
+     breaks = breaks,
+     right = FALSE,
+     col = "lightblue",
+     border = "black",
+     main = "Histogram of Study Time",
+     xlab = "Study Time (minutes)",
+     ylab = "Frequency")
+```
+
+### (c) Shape of the Distribution
+
+The distribution is close to symmetric, but it slightly skews right. 
+
+---
+
+## 9. Box Plot 
+
+### (a) Five-Number Summary
+
+`summary()` gives the min, Q1, median, Q3, and max in one step.
+
+```{r five-number-summary}
+summary(study_time)
+```
+
+```{r quartiles}
+Q1 <- quantile(study_time, 0.25)
+Q3 <- quantile(study_time, 0.75)
+med <- median(study_time)
+min_val <- min(study_time)
+max_val <- max(study_time)
+
+c(Min = min_val, Q1 = Q1, Median = med, Q3 = Q3, Max = max_val)
+```
+
+### (b) IQR and Outlier Check
+
+```{r iqr-outliers}
+IQR_val <- Q3 - Q1
+lower_fence <- Q1 - 1.5 * IQR_val
+upper_fence <- Q3 + 1.5 * IQR_val
+
+IQR_val
+lower_fence
+upper_fence
+
+# Any values outside the fences are outliers
+outliers <- study_time[study_time < lower_fence | study_time > upper_fence]
+outliers
+```
+
+If `outliers` prints as `numeric(0)`, that means there are none.
+
+### (c) Box Plot
+
+```{r boxplot}
+boxplot(study_time,
+        horizontal = TRUE,
+        col = "lightgreen",
+        main = "Box Plot of Study Time",
+        xlab = "Study Time (minutes)")
+```
+
+---
+
+## 10. Comparison
+
+**(a) Mean vs. Median**
+
+```{r mean-median}
+mean(study_time)
+median(study_time)
+```
+
+Compare the two numbers and the shape from part 8(c):

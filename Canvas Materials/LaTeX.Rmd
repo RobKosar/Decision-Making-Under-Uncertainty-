@@ -1,0 +1,91 @@
+---
+title: "LaTeX Examples in R Markdown"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document:
+    extra_dependencies: ["amsmath"]
+---
+
+# Introduction to LaTeX in R Markdown
+
+This document serves as a comprehensive reference guide for embedding LaTeX math notation and formatting inside R Markdown files. 
+
+## 1. Basic Inline and Block Math
+Use single `$` for math that flows with your text, and double `$$` to break the math onto its own centered line.
+
+The standard linear model is written as $Y = \beta_0 + \beta_1 X + \epsilon$, where $\epsilon$ represents the error term.
+
+We assume the errors follow a normal distribution:
+
+$$\epsilon \sim N(0, \sigma^2)$$
+
+## 2. Fractions and Sums
+Great for statistics, summaries, and mathematical definitions. Notice that wrapping multiple characters in curly braces `{}` keeps them grouped together under subscripts or superscripts.
+
+The sample mean formula is:
+
+$$\bar{X} = \frac{1}{n} \sum_{i=1}^{n} X_i$$
+
+The variance can be computed using:
+
+$$\sigma^2 = \frac{\sum_{i=1}^{n} (X_i - \bar{X})^2}{n - 1}$$
+
+## 3. Multi-line Aligned Equations
+Use the `aligned` environment to line up equations by their equal signs. The ampersand (`&`) marks the alignment point, and double backslashes (`\\`) create a new line.
+
+$$
+\begin{aligned}
+(x + y)^2 &= (x + y)(x + y) \\
+          &= x^2 + xy + yx + y^2 \\
+          &= x^2 + 2xy + y^2
+\end{aligned}
+$$
+
+## 4. Matrices and Vectors
+You can create formatted data tables or coefficient vectors using the `bmatrix` structure. Use `&` to separate columns and `\\` to separate rows.
+
+The design matrix $\mathbf{X}$ is structured as:
+
+$$
+\mathbf{X} = 
+\begin{bmatrix}
+1 & x_{11} & x_{12} \\
+1 & x_{21} & x_{22} \\
+\vdots & \vdots & \vdots \\
+1 & x_{n1} & x_{n2}
+\end{bmatrix}
+$$
+
+## 5. Piecewise Functions (Cases)
+Use the `cases` environment to write conditional mathematical definitions. Use `\text{}` to safely write plain text inside math mode.
+
+The indicator function is defined as:
+
+$$
+I_A(x) = 
+\begin{cases} 
+1 & \text{if } x \in A \\
+0 & \text{if } x \notin A 
+\end{cases}
+$$
+
+## 6. Greek Letters and Common Operators
+Here is a quick-reference list of how common symbols appear when knit:
+
+* **Greek letters:** $\alpha$, $\beta$, $\gamma$, $\theta$, $\lambda$, $\mu$, $\sigma$, $\Omega$
+* **Calculus:** $\int_{a}^{b} f(x) \,dx$ and $\lim_{x \to \infty} \frac{1}{x} = 0$
+* **Relations:** $\le$, $\ge$, $\neq$, $\approx$, $\propto$, $\in$
+* **Logic & Stats:** $\hat{y}$, $\bar{x}$, $\tilde{\mu}$, $\forall$, $\exists$
+
+## 7. PDF-Only Layout Tricks
+If you are knitting directly to a PDF, you can inject raw LaTeX layout commands like page breaks or vertical spacing directly into your markdown text:
+
+This text sits at the top of the section.
+
+\vspace{1.5cm}
+
+This text has exactly 1.5 centimeters of vertical blank space added right above it. 
+
+To force the remaining content to a brand new page, you can use the command: `\newpage`.
+
