@@ -1,0 +1,268 @@
+---
+title: 'Decision Making Under Uncertainty: Part III Probability Simulations in R'
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 6, fig.height = 4)
+set.seed(123)
+```
+
+# Problem 11: Coin-Toss Simulation
+
+We simulate 10,000 experiments. Each experiment tosses a fair coin 20 times and records the number of heads (1 = heads, 0 = tails).
+
+```{r p11-sim}
+n = 10000
+
+Flips = function() {
+  # 0 is tails, 1 is heads
+  flips = sample(0:1, 20, replace = TRUE)
+  s = sum(flips == 1)
+  return(s)
+}
+
+results = replicate(n, Flips())
+tab = table(results)
+```
+
+**(a) Histogram.** The bins are centered on the whole numbers 0 through 20 so each bar is one count of heads.
+
+```{r p11-a}
+hist(results, breaks = seq(-0.5, 20.5, by = 1),
+     main = "Number of Heads in 20 Tosses (10,000 Experiments)",
+     xlab = "Number of Heads")
+```
+
+**(b) Probability of exactly 10 heads.**
+
+```{r p11-b}
+p_10heads = (tab["10"]/n)*100
+cat("Probability of getting exactly 10 heads with 20 flips:", p_10heads, "%\n")
+```
+
+**(c) Probability of at least 15 heads.** We add the counts for 15, 16, ..., 20 heads.
+
+```{r p11-c}
+i = 15
+x = 0
+
+while (i <= 20) {
+  x = x + sum(results == i)
+  i = i + 1
+}
+
+p_15_heads_or_more = (x/n)*100
+cat("Probability of getting 15 heads or more with 20 flips:", p_15_heads_or_more, "%\n")
+```
+
+**(d) Comparison with theory.** The number of heads is Binomial(20, 1/2), so
+$P(X = 10) = \binom{20}{10}/2^{20}$ and $P(X \ge 15) = \sum_{k=15}^{20}\binom{20}{k}/2^{20}$.
+
+```{r p11-d}
+p_10heads_theoretical = (factorial(20)/(factorial(10)^2))/(2^20)
+cat("Theoretical probability of getting exactly 10 heads on 20 flips: ", p_10heads_theoretical*100, "%\n")
+cat("Simulated probability of getting exactly 10 heads on 20 flips: ", p_10heads, "%\n")
+
+i = 15
+x = 0
+
+while (i <= 20) {
+  x = x + factorial(20)/(factorial(20-i)*factorial(i))
+  i = i + 1
+}
+
+p_15_heads_or_more_t = (x/(2^20))*100
+cat("Theoretical probability of getting 15 heads or more on 20 flips: ", p_15_heads_or_more_t, "%\n")
+cat("Simulated probability of getting 15 heads or more on 20 flips: ", p_15_heads_or_more, "%\n")
+```
+
+**Explanation.** The simulated probability of exactly 10 heads is `r round(p_10heads, 2)`% compared with the theoretical `r round(p_10heads_theoretical*100, 2)`%. For at least 15 heads, the simulation gives `r round(p_15_heads_or_more, 2)`% compared with the theoretical `r round(p_15_heads_or_more_t, 2)`%. The histogram is bell shaped and centered at 10 heads. The simulated values are close to the theoretical ones, and the small differences are due to random variation from using 10,000 repetitions.
+
+# Problem 12: Birthday Simulation
+
+**(a) and (b)** Each simulation draws 30 birthdays from the days 1 to 365 with replacement. The function returns the number of repeated birthdays (people whose birthday already appeared earlier in the group). A simulation is a success if that number is at least 1. We run it 10,000 times.
+
+```{r p12-ab}
+bdays = list()
+
+Bdays = function(p) {
+  # 1-365, each number corresponds to a day of the year
+  bdays = append(bdays, sample(1:365, p, replace = TRUE))
+  return(sum(duplicated(bdays)))
+}
+
+results = replicate(n, Bdays(30))
+
+# Number of repeated birthdays in each trial; 0 means no shared birthday
+tab = table(results)
+tab
+sum(tab)
+```
+
+**(c) Estimated probability.** The trials with 0 repeats are failures, so every other trial counts as a success.
+
+```{r p12-c}
+p_1bday_shared = (n - tab[1]) / n
+cat("Estimated probability that a group of 30 people contains at least 2 people that share a birthday:", p_1bday_shared*100, "%\n")
+```
+
+**(d) Group sizes 2 to 70.** For each group size we repeat the 10,000 simulations and store the proportion of successes in an array, then plot the results. The vertical line marks 23 people and the horizontal line marks a probability of 0.5.
+
+```{r p12-d}
+i = 2
+rs = c()
+
+while (i <= 70) {
+  sim = replicate(n, Bdays(i))
+  
+  # Success = at least one repeated birthday
+  rs = append(rs, sum(sim > 0)/n)
+  
+  i = i + 1
+}
+
+x_shift = 2:70
+plot(x_shift, rs, type = "l", col = "blue",
+     main = "Probability of a Shared Birthday",
+     xlab = "Size of Group", ylab = "P(at least 2 share a birthday)")
+abline(h = 0.5, col = "red")
+abline(v = 23, col = "blue")
+```
+
+**Explanation.** For 30 people the estimated probability of a shared birthday is about `r round(p_1bday_shared*100, 1)`%, close to the theoretical value of $1 - \frac{365!}{335!\,365^{30}} \approx 70.6\%$. The simulated curve first reaches 0.5 at a group size of `r (2:70)[which(rs >= 0.5)[1]]`, essentially at the vertical line at 23 (the theoretical probability for 23 people is about 0.507, so random variation can shift the crossing by a person or so). Only about 23 people are needed for a better than even chance of a shared birthday. The probability is about `r round(rs[70-1]*100, 1)`% by 70 people.
+
+# Problem 13: Poker-Hand Simulation
+
+We simulate 1,000,000 five-card hands. Cards are numbered 1 to 52 by suit: hearts are 1:13, diamonds 14:26, clubs 27:39, and spades 40:52. For the aces we treat cards 1 to 4 as the four aces. Each hand is dealt without replacement, and the function checks whether exactly `target` of the cards fall in the range `min` to `max`.
+
+```{r p13-sim}
+n = 1000000
+
+PickCards = function(min, max, target) {
+  cards = sample(1:52, 5, replace = FALSE)
+  
+  flat_values = unlist(cards)
+  if (sum(flat_values >= min & flat_values <= max) == target) {
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+}
+```
+
+**(a) Exactly two hearts.** The estimate is the number of successful hands divided by the number of simulated hands (n).
+
+```{r p13-a}
+results = replicate(n, PickCards(1,13,2))
+tab = table(results)
+
+cat("Probability a five card hand has exactly two hearts:", ((tab["TRUE"]/n)*100), "%\n")
+p_2hearts_sim = tab["TRUE"]/n
+```
+
+**(b) Exactly three aces.**
+
+```{r p13-b}
+results = replicate(n, PickCards(1,4,3))
+tab = table(results)
+
+cat("Probability a five card hand has exactly three aces:", ((tab["TRUE"]/n)*100), "%\n")
+p_3aces_sim = tab["TRUE"]/n
+```
+
+**(c) Comparison with theory.** From Problem 6, the number of hands with exactly two hearts is $\binom{13}{2}\binom{39}{3}$, so the probability is $\binom{13}{2}\binom{39}{3}/\binom{52}{5}$.
+
+```{r p13-c}
+p_2hearts_theory = choose(13,2)*choose(39,3)/choose(52,5)
+cat("Theoretical probability of exactly two hearts:", p_2hearts_theory*100, "%\n")
+cat("Simulated probability of exactly two hearts:  ", p_2hearts_sim*100, "%\n")
+cat("Absolute difference:", abs(p_2hearts_sim - p_2hearts_theory)*100, "percentage points\n")
+
+# Extra check on the aces
+p_3aces_theory = choose(4,3)*choose(48,2)/choose(52,5)
+cat("Theoretical probability of exactly three aces:", p_3aces_theory*100, "%\n")
+cat("Simulated probability of exactly three aces:  ", p_3aces_sim*100, "%\n")
+```
+
+**(d) Why the values are not identical.** The simulation uses a finite number of random hands, so the observed proportion is subject to random sampling error. The standard error of a simulated proportion is $\sqrt{p(1-p)/n}$.
+
+```{r p13-d}
+se = sqrt(p_2hearts_theory*(1 - p_2hearts_theory)/n)
+cat("Approximate standard error of the simulated estimate:", se*100, "percentage points\n")
+```
+
+The simulated value for two hearts (`r round(p_2hearts_sim*100, 3)`%) is within about one standard error of the theoretical value (`r round(p_2hearts_theory*100, 3)`%). A larger number of hands would shrink the error, but a simulated proportion will almost never match the exact probability.
+
+# Problem 14: Combinatorics and Simulation
+
+A committee of 5 is chosen from 20 students, of whom 8 are mathematics majors (labeled 1 to 8) and 12 are not (labeled 9 to 20).
+
+**(a) Theoretical probability.** We choose 2 of the 8 majors and 3 of the 12 non-majors, out of all $\binom{20}{5}$ equally likely committees:
+$$P(\text{exactly 2 majors}) = \frac{\binom{8}{2}\binom{12}{3}}{\binom{20}{5}}.$$
+
+```{r p14-a}
+n = 10000
+p_2majors_theory = choose(8,2)*choose(12,3)/choose(20,5)
+cat("Theoretical probability of exactly 2 math majors:", p_2majors_theory*100, "%\n")
+```
+
+**(b) Simulation.** Each trial selects 5 students without replacement and counts how many are math majors.
+
+```{r p14-b}
+Committee = function() {
+  members = sample(1:20, 5, replace = FALSE)
+  return(sum(members <= 8))   # number of math majors on the committee
+}
+
+results = replicate(n, Committee())
+table(results)
+```
+
+**(c) Estimated probability.**
+
+```{r p14-c}
+p_2majors_sim = sum(results == 2)/n
+cat("Simulated probability of exactly 2 math majors:", p_2majors_sim*100, "%\n")
+```
+
+**(d) Comparison.**
+
+```{r p14-d}
+cat("Absolute difference:", abs(p_2majors_sim - p_2majors_theory)*100, "percentage points\n")
+```
+
+The simulated probability (`r round(p_2majors_sim*100, 2)`%) is very close to the theoretical probability (`r round(p_2majors_theory*100, 2)`%). The small difference is expected from random variation with 10,000 simulated committees.
+
+# Problem 15: Law of Large Numbers
+
+**(a) and (b)** For each number of rolls (10, 100, 1,000, 10,000, and 100,000) we roll a fair die that many times and compute the proportion of 6s.
+
+```{r p15-ab}
+roll_counts = c(10, 100, 1000, 10000, 100000)
+prop_sixes = rep(0, length(roll_counts))
+
+for (k in 1:length(roll_counts)) {
+  rolls = sample(1:6, roll_counts[k], replace = TRUE)
+  prop_sixes[k] = sum(rolls == 6)/roll_counts[k]
+}
+
+lln_table = data.frame(Rolls = roll_counts, Proportion_of_6s = prop_sixes,
+                       Distance_from_1_6 = abs(prop_sixes - 1/6))
+print(lln_table)
+```
+
+**(c) and (d) Plot with the theoretical probability.** The number of rolls is on a log scale because it grows by factors of 10. The dashed red line is $P(6) = 1/6$.
+
+```{r p15-cd}
+plot(roll_counts, prop_sixes, type = "b", log = "x", pch = 16, col = "blue",
+     main = "Proportion of 6s vs. Number of Rolls",
+     xlab = "Number of Rolls (log scale)", ylab = "Proportion of 6s",
+     ylim = c(0, max(prop_sixes, 1/6) + 0.05))
+abline(h = 1/6, col = "red", lty = 2)
+```
+
+**(e) Explanation.** With only 10 rolls the proportion of 6s was `r round(prop_sixes[1], 3)`, noticeably far from $1/6 \approx 0.1667$. As the number of rolls increased, the proportion moved closer to $1/6$, reaching `r round(prop_sixes[5], 4)` with 100,000 rolls. This illustrates the Law of Large Numbers: as the number of repetitions of an experiment grows, the observed proportion of successes gets closer to the true probability. Small samples can deviate a lot by chance, while large samples average out these fluctuations. (The convergence is not perfectly monotone, since a single run at a larger size can occasionally be a bit farther away than a smaller one.)
